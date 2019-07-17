@@ -32,7 +32,7 @@ $(document).ready(function() {
 
     formHtml += '<br><br><input type="submit" value="Начать скачивание">';
     formHtml += '</form>';
-console.log(formHtml);
+
     $('#content').append( $(formHtml) );
   }
   var getModuleInfoError = function(data){
@@ -59,39 +59,22 @@ console.log(formHtml);
     }
   });
 
+  $(document).on("submit", '#module_update', function (e) {
+    e.preventDefault();
 
-
-  // кто то клацнул по форме, начинаем работать.
-  $('#module_update').submit(function( event ) {
-    event.preventDefault();
-
-    // получим адрес формы
-    //var url = event.target.action; console.log(url);
-
-    // TODO type=module or clean_install fix
-    //  url = $( this ).attr( "action" ) + '?type=module';
-    url = $( this ).attr( "action" ) + '?type=clean_install';
-    //console.log(url);
-
-    // обьект который будет хранить значения формы
-    var values = new Object();
     // сохраняем значения формы в переменную.
     var field = $(this).serializeArray();
-    console.log(field);
 
-    for (var i=0, count=field.length; i<count; i++) {
-
-      console.log(field[i]);
+    var loadFunction = function (name) {
 
       $.ajax({
         type: "POST",
         url: url,
-        data: field[i],
+        dataType : 'json',
+        data: {method: 'loadModule', name: name },
         success: function(msg){
-
-          console.log(msg);
-          var t = '.checkbox.'+ msg +' .text';
-          if(msg == 'true'){
+          var t = '.checkbox.'+ name +' .text';
+          if(msg.error === 'ERROR_NOT'){
             $(t).css('color', 'blue');
             $(t).css('font-weight', '800');
           } else {
@@ -100,14 +83,12 @@ console.log(formHtml);
           }
         }
       });
+
     }
 
-    // Object {views: "on", views2: "on"}
-    //console.log(values);
-    //alert('Завершено');
-
-
-    // скачивание и разархивирование модуля по одному на сервере
+    for (var i=0, count=field.length; i<count; i++) {
+      loadFunction(field[i].name)
+    }
 
   });
 

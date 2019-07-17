@@ -1,4 +1,249 @@
 <?php
+define("ROOT_DIR_MODULE_UPDATE", __DIR__);
+
+
+// print __FILE__;
+// print phpinfo();
+// Создание дирректории если она не существует
+function dir_add($dir_name) {
+  if(!file_exists($dir_name)){ // проверка на всякий случай
+    mkdir($dir_name);
+    //print "Создана папка >> $dir_name<br>";
+  } else {
+    //print "Папка существует >> $dir_name<br>";
+  }
+}
+
+// функция копирования файлов
+function full_copy($source, $target) {
+  if (is_dir($source))  {
+    @mkdir($target);
+    $d = dir($source);
+    while (FALSE !== ($entry = $d->read())) {
+      if ($entry == '.' || $entry == '..') continue;
+      full_copy("$source/$entry", "$target/$entry");
+    }
+    $d->close();
+  }
+  else if (!copy($source, $target)) { echo "<b style='color:red;'>не удалось скопировать $source </b><br>";}
+}
+
+// функция удаления папки
+function removeDirectory($dir) {
+  if ($objs = glob($dir."/*")) {
+    foreach($objs as $obj) {
+      is_dir($obj) ? removeDirectory($obj) : unlink($obj);
+    }
+  }
+  rmdir($dir);
+}
+
+
+
+function getPage(){
+  return <<<HTML
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Обновление</title>
+</head>
+<body>
+
+  <style>body,p,h1,h2,h3,h4,h5,h6 {margin:0px; padding:0px; font-family: 'courier new'; font-weight: 500;}
+body {background: #fff;}
+h1 { font-size: 1.538em; }
+h2 { font-size: 1.385em; }
+h3 { font-size: 1.231em; }
+h4 { font-size: 1.154em; }
+h5,h6 {font-size: 1.077em;}
+.header {
+	overflow: hidden;
+	padding: 30px 20px 0 20px;
+	position: relative;
+	background-color: #e0e0d8;
+	height:50px;
+}
+
+.page {
+	padding: 20px 0 40px 0;
+	color: #333;
+	width: 960px;
+	margin: auto;
+}
+
+.group .text {
+	display: inline-block;
+	font-size: 14px;
+}
+
+#module_update{
+	position: relative;
+}
+.group {
+	width: 320px;
+	vertical-align: top;
+	font-family: 'Times New Roman';
+}
+.group .title {
+	font-weight: bold;
+	margin-top: -1px;
+	border: 1px solid black;
+	padding:10px;
+}
+.group:hover .group_checkbox{ display:block; }
+.group .group_checkbox{
+	display: none;
+	position: absolute;
+	left: 320px;
+	top: 0px;
+	width: 320px;
+	height: 547px;
+	background: #ccc;
+}
+
+.group .info .help{
+	display: inline-block;
+	background: rgb(226, 226, 226);
+	color: red;
+	font-weight: 800;
+	padding: 0px 5px;
+	border-radius: 10px;
+	cursor: default;
+}
+.group .info{
+	display: inline-block;
+	margin: 0 5px;
+}
+.group .description {
+	display: none;
+	background: #ddd;
+	width: 320px;
+	height:547px;
+	position: absolute;
+	left: 320px;
+	top: 0px;
+	padding: 5px;
+	z-index: 1;
+}
+.group .info:hover .description{ display:block; }
+.checkbox{
+	padding-top: 10px;
+	padding-left: 10px;
+}</style>
+
+  <div class="header">
+    <h2>Страница установки модулей Drupal</h2>
+  </div>
+
+  <div class="page">
+    <h2>Фаил начальной установки Друпал 7, а так же модулей (использование на свой страх и риск!)</h2>
+    <div id="content"></div>
+  </div>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script>$(document).ready(function() {
+  console.log( "ready!" );
+
+  var url = '/module_update.php';
+
+  var getModuleInfoSuccess = function(data){
+    var formHtml = '';
+
+    formHtml += '<form id="module_update">';
+
+    for(var i = 0; i < data.length; i++){
+      var group = data[i];
+      formHtml += '  <div class="group ' + group.group_class + '">';
+      formHtml += '    <div class="title">' + group.group_name + '</div>';
+      formHtml += '    <div class="group_checkbox">';
+
+      for(var j = 0; j < group.modules.length; j++){
+        var module = group.modules[j];
+        formHtml += '      <div class="checkbox ' + module.sistem_name + '">';
+        formHtml += '        <input type="checkbox" name="' + module.sistem_name + '">';
+        formHtml += '        <div class="info">' +
+                    '          <div class="help">?</div>' +
+                    '          <div class="description">' + module.description + '</div>' +
+                    '        </div>' +
+                    '        <div class="text">' + module.name + '</div>' +
+                    '      </div>';
+      }
+
+      formHtml += '    </div>';
+      formHtml += '  </div>';
+    }
+
+    formHtml += '<br><br><input type="submit" value="Начать скачивание">';
+    formHtml += '</form>';
+
+    $('#content').append( $(formHtml) );
+  }
+  var getModuleInfoError = function(data){
+    var formHtml = '<h2>Не удалось получить информацию по модулям</h2>';
+    $('#content').append( $(formHtml) );
+  }
+
+  $.ajax({
+    type: "POST",
+    url: url,
+    dataType : 'json',
+    data: {method: 'getModuleInfo'},
+    success: function(msg){
+      console.log(msg);
+      if(msg.error !== 'ERROR_NOT'){
+        getModuleInfoError();
+        return;
+      }
+      getModuleInfoSuccess(msg.data);
+    },
+    error: function (err) {
+      console.log(err);
+      getModuleInfoError();
+    }
+  });
+
+  $(document).on("submit", '#module_update', function (e) {
+    e.preventDefault();
+
+    // сохраняем значения формы в переменную.
+    var field = $(this).serializeArray();
+
+    var loadFunction = function (name) {
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        dataType : 'json',
+        data: {method: 'loadModule', name: name },
+        success: function(msg){
+          var t = '.checkbox.'+ name +' .text';
+          if(msg.error === 'ERROR_NOT'){
+            $(t).css('color', 'blue');
+            $(t).css('font-weight', '800');
+          } else {
+            $(t).css('color', 'red');
+            $(t).css('font-weight', '800');
+          }
+        }
+      });
+
+    }
+
+    for (var i=0, count=field.length; i<count; i++) {
+      loadFunction(field[i].name)
+    }
+
+  });
+
+});
+</script>
+
+</body>
+</html>
+HTML;
+}
+
 
 /*
  * Не обработанные модули
@@ -226,4 +471,122 @@ function getModuleInfo(&$error, &$returnData) {
       ],
     ],
   ];
+}
+
+
+function loadModule(&$error, &$returnData) {
+
+  $fileLoadFormat = 'ZIP';
+  if (!isset($_POST['archive']) && $_POST['archive'] == 'gz') { $fileLoadFormat = 'QZ'; }
+
+  if (!isset($_POST['name'])) {
+    $error = 'ERROR_NOT_MODULE_NAME';
+    return;
+  }
+
+  $url = 'http://updates.drupal.org/release-history/' . $_POST['name'] . '/7.x';
+  $somepage = file_get_contents($url);
+  $xml = simplexml_load_string($somepage);
+
+  if (!isset($xml->releases->release[0]->download_link)) {
+    $error = 'ERROR_NOT_CORRECT_XML_STRUCTURE';
+    return;
+  }
+
+  if($fileLoadFormat === 'ZIP'){
+    $drupal_download_url = $xml->releases->release[0]->files->file[1]->url;
+    // https://ftp.drupal.org/files/projects/admin_menu-7.x-3.0-rc6.zip
+  } else {
+    $drupal_download_url = $xml->releases->release[0]->download_link;
+    // https://ftp.drupal.org/files/projects/admin_menu-7.x-3.0-rc6.tar.gz
+  }
+
+  // имя файла
+  $drupal_filename = substr($drupal_download_url, strripos($drupal_download_url, '/') + 1, strlen($drupal_download_url));
+
+  // тут инициализируем переменные
+  $drupal_work_dir = ROOT_DIR_MODULE_UPDATE . '/temp/';     // временная папка в которую будет все сохранятся ../***/
+  $drupal_template = $drupal_work_dir . 'module_download/'; // временная папка в которую будет все сохранятся ../temp/.../
+  $drupal_arhive   = $drupal_work_dir . 'arhive/';          // дирректория где будет лежать скаченный архив
+
+  // todo
+  // $drupal_template = "module_download"; // временная папка в которую будет все сохранятся template/temp/
+  // // уточняем рабочую дирректорию template/module_download_XX/
+  // $prefix = "";
+  // $id = 0;
+  // //while(file_exists($drupal_work_dir.$drupal_template.$prefix)){ $id++; $prefix = '_'.$id; }
+  // $drupal_template = $drupal_work_dir . $drupal_template . $prefix . '/'; // template/module_download_XX/
+  // // куда сохраняем архив template/module_download_XX/arhive/
+  // $drupal_arhive = $drupal_template . $drupal_arhive . '/';
+
+
+  // указываем куда сохранять скаченный фаил
+  $drupal_save_dir = $drupal_arhive . $drupal_filename; // куда сохраняем скаченное с именем
+
+  try {
+    dir_add($drupal_work_dir);        // template/
+    dir_add($drupal_template);        // папка для текущего выполнения скрипта template/module_download_XX/
+    dir_add($drupal_arhive);          // папка с архивом template/module_download_XX/arhive/
+  } catch (Exception $e) {
+    $error = 'ERROR_WORK_DIRECTORY_NOT_CREATE';
+    $returnData = ['message' => "Ошибка создания дирректории : " . $e->getMessage()];
+    return;
+  }
+
+  // скачивание файла
+  file_put_contents($drupal_save_dir, file_get_contents($drupal_download_url));
+
+  // распаковываем все это
+  if ($_POST['name'] == 'drupal') {
+    $drupal_template = ROOT_DIR_MODULE_UPDATE . '/';
+  } else {
+    $drupal_template = ROOT_DIR_MODULE_UPDATE . '/sites/all/modules/';
+  }
+
+  if($fileLoadFormat === 'ZIP'){
+    // распаковываем все это
+    $zip = new ZipArchive(); // Создаём объект для работы с ZIP-архивами
+    // Открываем архив и делаем проверку успешности открытия
+    if ($zip->open($drupal_save_dir) === true) {
+      $zip->extractTo($drupal_template); //Извлекаем файлы в указанную директорию
+      $zip->close(); //Завершаем работу с архивом
+    } else {
+      $error = 'ERROR_ZIP_ARCHIVE_OPEN';
+      return;
+    }
+  } else {
+    try {
+      $phar = new PharData($drupal_save_dir);
+      $phar->extractTo($drupal_template); // extract all files
+    } catch (Exception $e) {
+      $error = 'ERROR_GZ_ARCHIVE_OPEN';
+      return;
+    }
+  }
+
+}
+
+
+
+// test
+// $_POST['name'] = 'admin_menu';
+// $error      = 'ERROR_NOT';
+// $returnData = [];
+// loadModule($error, $returnData);
+// exit();
+
+// роут на коленке
+if($_SERVER["REQUEST_METHOD"]=='GET') {
+  echo getPage();
+}
+if($_SERVER["REQUEST_METHOD"]=='POST') {
+  $error      = 'ERROR_NOT';
+  $returnData = [];
+  switch($_POST['method']){
+    case 'getModuleInfo': getModuleInfo($error, $returnData); break;
+    case 'loadModule'   : loadModule($error, $returnData);    break;
+    default: $error = 'ERROR_NOT_CORRECT_METHOD_NAME'; $returnData = []; break;
+  }
+
+  echo json_encode(['error'=> $error, 'data' => $returnData ]);
 }
