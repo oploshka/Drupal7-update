@@ -6,15 +6,18 @@ $(document).ready(function() {
 
     // получим адрес формы
     //var url = event.target.action; console.log(url);
+
+    // TODO type=module or clean_install fix
+    //  url = $( this ).attr( "action" ) + '?type=module';
     url = $( this ).attr( "action" ) + '?type=clean_install';
     //console.log(url);
 
     // обьект который будет хранить значения формы
     var values = new Object();
     // сохраняем значения формы в переменную.
-    console.log($(this).serializeArray());
-
     var field = $(this).serializeArray();
+    console.log(field);
+
     for (var i=0, count=field.length; i<count; i++) {
 
       console.log(field[i]);
@@ -37,25 +40,7 @@ $(document).ready(function() {
         }
       });
     }
-    /*$.each($(this).serializeArray(), function(i, field) {
-      //values[field.name] = field.value;
-      $.ajax({
-        type: "POST",
-        url: url,
-        data: field,
-        success: function(msg){
-          var t = '.checkbox.'+field.name+' .text';
-          if(msg == 'true'){
-            $(t).css('color', 'blue');
-            $(t).css('font-weight', '800');
-          } else {
-            $(t).css('color', 'red');
-            $(t).css('font-weight', '800');
-          }
-        }
-      });
 
-    });*/
     // Object {views: "on", views2: "on"}
     //console.log(values);
     //alert('Завершено');
