@@ -1,5 +1,3 @@
-// load https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js
-
 $(document).ready(function() {
   console.log( "ready!" );
   // кто то клацнул по форме, начинаем работать.
@@ -15,6 +13,30 @@ $(document).ready(function() {
     var values = new Object();
     // сохраняем значения формы в переменную.
     console.log($(this).serializeArray());
+
+    var field = $(this).serializeArray();
+    for (var i=0, count=field.length; i<count; i++) {
+
+      console.log(field[i]);
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: field[i],
+        success: function(msg){
+
+          console.log(msg);
+          var t = '.checkbox.'+ msg +' .text';
+          if(msg == 'true'){
+            $(t).css('color', 'blue');
+            $(t).css('font-weight', '800');
+          } else {
+            $(t).css('color', 'red');
+            $(t).css('font-weight', '800');
+          }
+        }
+      });
+    }
     /*$.each($(this).serializeArray(), function(i, field) {
       //values[field.name] = field.value;
       $.ajax({
