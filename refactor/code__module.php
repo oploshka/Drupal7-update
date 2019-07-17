@@ -1,11 +1,9 @@
 <?php
 
-// чистая установка
-if (isset($_GET['type']) && $_GET['type']=='clean_install'){
-  //проверяем наличие пост запроса.
-  //print 'пункт 1';
+if (isset($_GET['type']) && $_GET['type']=='module'){
+  // проверяем наличие пост запроса.
   if($_SERVER["REQUEST_METHOD"]=='POST') {
-    //тут необходимо скачать модуль
+    // тут необходимо скачать модуль
     if (!isset($_POST['name'])){ exit ('неверный post запрос');}
     $url = 'http://updates.drupal.org/release-history/'.$_POST['name'].'/7.x';
     $somepage = file_get_contents($url);
@@ -30,7 +28,7 @@ if (isset($_GET['type']) && $_GET['type']=='clean_install'){
     // уточняем рабочую дирректорию template/module_download_XX/
     $drupal_work_dir.="/"; // template/
     $prefix = ""; $id=0;
-    //while(file_exists($drupal_work_dir.$drupal_template.$prefix)){ $id++; $prefix = '_'.$id; }
+    while(file_exists($drupal_work_dir.$drupal_template.$prefix)){ $id++; $prefix = '_'.$id; }
     $drupal_template = $drupal_work_dir.$drupal_template.$prefix.'/'; // template/module_download_XX/
 
 
@@ -54,16 +52,13 @@ if (isset($_GET['type']) && $_GET['type']=='clean_install'){
     file_put_contents($drupal_save_dir, file_get_contents($drupal_download_url));
 
     // распаковываем все это
-    if($_POST['name']=='drupal'){$drupal_template = __DIR__;} else {$drupal_template = 'modules_new/';}
     try {
       $phar = new PharData($drupal_save_dir);
-      $phar->extractTo($drupal_template); // extract all files
+      $phar->extractTo($drupal_template.'module/'); // extract all files
     } catch (Exception $e) {
       echo "Ошибка разархивации"; //Выводим уведомление об ошибке
-      exit('{"error": 1 }');
     }
 
-    //exit($_POST['name'].' завершено;');
-    exit($_POST['name']);
+    exit('завершено');
   }
 }
