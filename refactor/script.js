@@ -6,7 +6,10 @@ $(document).ready(function() {
 
     // получим адрес формы
     //var url = event.target.action; console.log(url);
-    url = $( this ).attr( "action" ) + '?type=module';
+
+    // TODO type=module or clean_install fix
+    //  url = $( this ).attr( "action" ) + '?type=module';
+    url = $( this ).attr( "action" ) + '?type=clean_install';
     //console.log(url);
 
     // обьект который будет хранить значения формы
@@ -21,6 +24,14 @@ $(document).ready(function() {
         success: function(msg){
           console.log( "Прибыли данные: ");
           console.log( msg );
+          var t = '.checkbox.'+field.name+' .text';
+          if(msg == 'true'){
+            $(t).css('color', 'blue');
+            $(t).css('font-weight', '800');
+          } else {
+            $(t).css('color', 'red');
+            $(t).css('font-weight', '800');
+          }
         }
       });
 

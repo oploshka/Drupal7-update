@@ -14,8 +14,11 @@ if (isset($_GET['type']) && $_GET['type']=='clean_install'){
     if (!isset($xml->releases->release[0]->download_link)){
       exit ('неверная стурктура xml');
     }
+    // TODO: fix $drupal_download_url
     // тут уже определяем ссылку для скачивания
     $drupal_download_url = $xml->releases->release[0]->download_link;
+    // для zip
+    $drupal_download_url = $xml->releases->release[0]->files->file[1]->url;
     // имя файла
     $drupal_filename  = substr($drupal_download_url, strripos($drupal_download_url, '/') + 1, strlen($drupal_download_url));
 
@@ -65,6 +68,22 @@ if (isset($_GET['type']) && $_GET['type']=='clean_install'){
       exit('{"error": 1 }');
     }
 
-    exit($_POST['name'].' завершено;');
+    // распаковываем все это
+    $zip = new ZipArchive(); //Создаём объект для работы с ZIP-архивами
+    //Открываем архив и делаем проверку успешности открытия
+    if ($zip->open($drupal_save_dir) === true) {
+      print "начало извлечения файлов в $drupal_template<br>";
+      $zip->extractTo($drupal_template); //Извлекаем файлы в указанную директорию
+      $zip->close(); //Завершаем работу с архивом
+      print "Архив успешно извлечен<br>";
+    }
+    else {
+      echo "Архива не существует!"; //Выводим уведомление об ошибке
+      return;
+    }
+
+    //exit($_POST['name'].' завершено;');
+    exit('true');
   }
 }
+?>
