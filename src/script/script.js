@@ -1,5 +1,4 @@
 $(document).ready(function() {
-  console.log( "ready!" );
 
   var url = '/module_update.php';
 
@@ -46,7 +45,6 @@ $(document).ready(function() {
     dataType : 'json',
     data: {method: 'getModuleInfo'},
     success: function(msg){
-      console.log(msg);
       if(msg.error !== 'ERROR_NOT'){
         getModuleInfoError();
         return;

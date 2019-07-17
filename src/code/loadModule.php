@@ -32,7 +32,7 @@ function loadModule(&$error, &$returnData) {
 
   // тут инициализируем переменные
   $drupal_work_dir = ROOT_DIR_MODULE_UPDATE . '/temp/';     // временная папка в которую будет все сохранятся ../***/
-  $drupal_template = $drupal_work_dir . 'module_download/'; // временная папка в которую будет все сохранятся ../temp/.../
+  // $drupal_template = $drupal_work_dir . 'module_download/'; // временная папка в которую будет все сохранятся ../temp/.../
   $drupal_arhive   = $drupal_work_dir . 'arhive/';          // дирректория где будет лежать скаченный архив
 
   // todo
@@ -51,7 +51,7 @@ function loadModule(&$error, &$returnData) {
 
   try {
     dir_add($drupal_work_dir);        // template/
-    dir_add($drupal_template);        // папка для текущего выполнения скрипта template/module_download_XX/
+    // dir_add($drupal_template);        // папка для текущего выполнения скрипта template/module_download_XX/
     dir_add($drupal_arhive);          // папка с архивом template/module_download_XX/arhive/
   } catch (Exception $e) {
     $error = 'ERROR_WORK_DIRECTORY_NOT_CREATE';
