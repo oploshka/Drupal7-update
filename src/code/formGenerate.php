@@ -1,7 +1,6 @@
+<form id="module_update" action="/module_update.php" method="post">
 <?php
-
-$form = array();
-
+$form = [];
 // выводим форму.
 foreach ($form as $value){
   print '<div class="group '.$value['group_class'].'">';
@@ -16,3 +15,6 @@ foreach ($form as $value){
   print '</div>';
   print '</div>';
 }
+?>
+  <br><br><input type="submit" value="Начать скачивание">
+</form>
