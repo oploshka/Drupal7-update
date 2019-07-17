@@ -1,0 +1,5 @@
+# default mask
+__*
+
+# IDE
+.idea
